@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="pypicloud-tools",
-    version="0.0.1",
+    version="0.0.2",
     author="Adam Talsma",
     author_email="se-adam.talsma@ccpgames.com",
     packages=["pypicloud_tools"],
