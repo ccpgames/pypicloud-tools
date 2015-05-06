@@ -1,5 +1,11 @@
 # pypicloud-tools
 
+[![Version](https://img.shields.io/pypi/v/pypicloud-tools.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
+[![Download format](https://img.shields.io/badge/format-wheel-green.svg?)](https://pypi.python.org/pypi/pypicloud-tools/)
+[![Downloads this month](https://img.shields.io/pypi/dm/pypicloud-tools.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
+[![Development Status](https://img.shields.io/badge/status-beta-orange.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
+[![License](https://img.shields.io/github/license/ccpgames/pypicloud-tools.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
+
 Tools to bypass a PyPICloud installation and communicate directly with S3
 
 
@@ -55,3 +61,28 @@ Configuration for pypicloud-tools piggybacks on your `~/.pypirc` file. You can s
 ```
 
 The key **must** be `pypicloud`, it is the only key pypicloud-tools will look at. The username/password combination should have admin credentials on the PyPICloud installation as it needs to call `/admin/rebuild` after a succesful upload.
+
+
+# Copyright and License
+
+pypicloud-tools was written by Adam Talsma
+
+Copyright (c) 2015 CCP hf.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
