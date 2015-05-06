@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pypicloud-tools by ccpgames</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Pypicloud-tools</h1>
+        <p>Tools to bypass a PyPICloud installation and communicate directly with S3</p>
+
+        <p class="view"><a href="https://github.com/ccpgames/pypicloud-tools">View the Project on GitHub <small>ccpgames/pypicloud-tools</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/ccpgames/pypicloud-tools/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ccpgames/pypicloud-tools/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ccpgames/pypicloud-tools">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="pypicloud-tools" class="anchor" href="#pypicloud-tools" aria-hidden="true"><span class="octicon octicon-link"></span></a>pypicloud-tools</h1>
+
+<p><a href="https://pypi.python.org/pypi/pypicloud-tools/"><img src="https://img.shields.io/pypi/v/pypicloud-tools.svg" alt="Version"></a>
+<a href="https://pypi.python.org/pypi/pypicloud-tools/"><img src="https://img.shields.io/badge/format-wheel-green.svg?" alt="Download format"></a>
+<a href="https://pypi.python.org/pypi/pypicloud-tools/"><img src="https://img.shields.io/pypi/dm/pypicloud-tools.svg" alt="Downloads this month"></a>
+<a href="https://pypi.python.org/pypi/pypicloud-tools/"><img src="https://img.shields.io/badge/status-beta-orange.svg" alt="Development Status"></a>
+<a href="https://pypi.python.org/pypi/pypicloud-tools/"><img src="https://img.shields.io/github/license/ccpgames/pypicloud-tools.svg" alt="License"></a></p>
+
+<p>Tools to bypass a PyPICloud installation and communicate directly with S3</p>
+
+<h2>
+<a id="utilities" class="anchor" href="#utilities" aria-hidden="true"><span class="octicon octicon-link"></span></a>Utilities</h2>
+
+<h3>
+<a id="upload" class="anchor" href="#upload" aria-hidden="true"><span class="octicon octicon-link"></span></a>Upload</h3>
+
+<p>Uploads file(s) to the PyPICloud S3 bucket directly and performs an admin API call to rebuild the PyPICloud index after.</p>
+
+<h3>
+<a id="download" class="anchor" href="#download" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download</h3>
+
+<p>Downloads the latest or a specific version directly from S3. Does not talk to PyPICloud and does not install the downloaded package. You can use pip to do either/both of those things.</p>
+
+<p>Also possible with the download command is the <code>--url</code> flag to only print a download URL (usable for 5 minutes).</p>
+
+<p>By default, if there are multiple releases of the same package+release, download will prefer wheels, then eggs, then source distributions. You can override that behavior with the <code>--egg</code> and <code>--src</code> flags.</p>
+
+<h3>
+<a id="list" class="anchor" href="#list" aria-hidden="true"><span class="octicon octicon-link"></span></a>List</h3>
+
+<p>Lists a package's releases, or releases of a package at a specific version. Again, talks straight to S3 and bypasses the PyPICloud installation.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<h3>
+<a id="simple" class="anchor" href="#simple" aria-hidden="true"><span class="octicon octicon-link"></span></a>Simple</h3>
+
+<div class="highlight highlight-bash"><pre>$ pip install pypicloud-tools</pre></div>
+
+<h3>
+<a id="from-source" class="anchor" href="#from-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>From source</h3>
+
+<div class="highlight highlight-bash"><pre>$ git clone https://github.com/ccpgames/pypicloud-tools.git
+$ <span class="pl-c1">cd</span> pypicloud-tools
+$ python setup.py install</pre></div>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>Configuration for pypicloud-tools piggybacks on your <code>~/.pypirc</code> file. You can specify an alternate config file with the <code>--config</code> flag, but it must be in the same syntax. That syntax is:</p>
+
+<pre lang="conf"><code>[pypicloud]
+    repository:http://your.pypicloud.server/pypi
+    username:admin
+    password:hunter7
+    bucket:your_bucket
+    access:some_key
+    secret:other_key
+    acl:optional_acl
+</code></pre>
+
+<p>The key <strong>must</strong> be <code>pypicloud</code>, it is the only key pypicloud-tools will look at. The username/password combination should have admin credentials on the PyPICloud installation as it needs to call <code>/admin/rebuild</code> after a succesful upload.</p>
+
+<h1>
+<a id="copyright-and-license" class="anchor" href="#copyright-and-license" aria-hidden="true"><span class="octicon octicon-link"></span></a>Copyright and License</h1>
+
+<p>pypicloud-tools was written by Adam Talsma</p>
+
+<p>Copyright (c) 2015 CCP hf.</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/ccpgames">ccpgames</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
