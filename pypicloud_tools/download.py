@@ -78,7 +78,7 @@ def download_package(bucket, package, release=None):
         # maybe we have a few different format types for the same release
         package_key = prefer_wheels(package_releases, package, release)
     elif release is not None and not package_releases:
-        raise SystemExit("Package {}={} not found.".format(package, release))
+        raise SystemExit("Package {}={} not found".format(package, release))
     elif package_releases:
         versioned = defaultdict(list)
         for package_release in package_releases:
@@ -104,7 +104,7 @@ def download_package(bucket, package, release=None):
         ver_order = sorted(versioned)
         package_key = prefer_wheels(versioned[ver_order[-1]], package, release)
     else:
-        raise SystemExit("{}{} not found!".format(
+        raise SystemExit("Package {}{} not found".format(
             package,
             "={}".format(release) if release else "",
         ))
@@ -112,11 +112,15 @@ def download_package(bucket, package, release=None):
     if "--url-only" in sys.argv or "--url" in sys.argv:
         print(package_key.generate_url(300))  # good for 5 minutes
     else:
-        # open a file and stream the content into it
-        filename = package_key.name.split("/")[1]
-        with open(filename, "wb") as openpackage:
-            package_key.get_contents_to_file(openpackage)
-        print("{} saved to disk".format(filename))
+        if sys.stdout.isatty():
+            # open a file and stream the content into it
+            filename = package_key.name.split("/")[1]
+            with open(filename, "wb") as openpackage:
+                package_key.get_contents_to_file(openpackage)
+            print(filename)
+        else:
+            # stdout is being piped/redirected somewhere, write to it directly
+            package_key.get_contents_to_file(sys.stdout)
 
 
 def main():

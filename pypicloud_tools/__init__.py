@@ -114,7 +114,7 @@ def settings_from_config(options):
     return s3_conf, pypi_conf
 
 
-def parse_args(upload=False, download=False, list=False):
+def parse_args(upload=False, download=False, listing=False):
     """Builds an argparse ArgumentParser.
 
     Returns:
@@ -184,20 +184,22 @@ def parse_args(upload=False, download=False, list=False):
     return parser.parse_args(sys.argv[1:]), parser
 
 
-def get_settings(upload=False, download=False, list=False):
+def get_settings(upload=False, download=False, listing=False):
     """Gathers both settings for S3 and PyPICloud.
 
     Args:
-        upload: boolean of if this is an upload or a download
+        upload: boolean of if this is an upload
+        download: boolean of if this is a download
+        listing: boolean of if this is a listing
 
     Returns:
         a Settings object with `s3` and `pypi` attributes
     """
 
-    if len([key for key in (upload, download, list) if key]) != 1:
+    if len([key for key in (upload, download, listing) if key]) != 1:
         raise RuntimeError("Expecting a single boolean argument to be True!")
 
-    args, parser = parse_args(upload, download, list)
+    args, parser = parse_args(upload, download, listing)
 
     if hasattr(args, "files"):
         remainders = args.files
@@ -207,7 +209,7 @@ def get_settings(upload=False, download=False, list=False):
     # ignore --long-opts which might be used per-module inline from sys.argv
     remainders = [rem for rem in remainders if not rem.startswith("--")]
 
-    if not remainders:
+    if not remainders and not listing:
         raise SystemExit(parser.print_help())
 
     if args.bucket and args.access and args.secret:
@@ -240,7 +242,7 @@ def get_settings(upload=False, download=False, list=False):
 def parse_package(package):
     """Parse `package` string to package name and package version."""
 
-    if "=" in package:
+    if package and "=" in package:
         # would like to use left-side unpacking, but old python support :`(
         p_split = package.split("=")
         return p_split[0].strip(), p_split[-1].strip()

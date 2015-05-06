@@ -7,6 +7,7 @@ Copyright (c) 2015 CCP Games. Released for use under the MIT license.
 from __future__ import print_function
 
 import os
+import re
 import math
 import requests
 from filechunkio import FileChunkIO
@@ -47,7 +48,20 @@ def upload_file(filename, bucket, s3_config):
     num_chunks = int(math.ceil(source_size / float(bytes_per_chunk)))
 
     # determine the key name from the filename
-    base_name = os.path.basename(filename).rsplit("-")[0]
+    sections = re.split("\.|-|_", os.path.basename(filename))
+    base_name = ""
+    for section in sections:
+        try:
+            int(section)
+        except:
+            base_name = "{}{}{}".format(
+                base_name,
+                "_" if base_name else "",
+                section,
+            )
+        else:
+            break
+
     key_name = "{}/{}".format(base_name, os.path.basename(filename))
     mp = bucket.initiate_multipart_upload(key_name, headers=headers)
 

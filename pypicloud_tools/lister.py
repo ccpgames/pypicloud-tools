@@ -31,10 +31,23 @@ def list_package(bucket, package, release=None):
     # available in the bucket...
     package_releases = []
     for key in bucket.get_all_keys():
-        if key.name.startswith("{}/".format(package)):
-            pkg_full_name = key.name.partition("/")[2]
-            if release is None or release in pkg_full_name:
+        if key.name.startswith("{}/".format(package)) or package is None:
+            package_base, _, pkg_full_name = key.name.partition("/")
+            if package is None:
+                if package_base not in package_releases:
+                    package_releases.append(package_base)
+            elif release is None or release in pkg_full_name:
                 package_releases.append(pkg_full_name)
+
+    if package is None:
+        package_releases.sort()
+        print("\n".join(package_releases))
+    else:
+        print_versioned(package_releases, package)
+
+
+def print_versioned(package_releases, package):
+    """Prints package releases to stdout in order of version number."""
 
     # sort them via pkg_resources' version sorting
     versioned = defaultdict(list)
@@ -67,14 +80,15 @@ def list_package(bucket, package, release=None):
 def main():
     """Main command line entry point for listing."""
 
-    settings = get_settings(list=True)
+    settings = get_settings(listing=True)
     bucket = get_bucket_conn(settings.s3)
 
-    for package in settings.items:
+    for package in settings.items or [None]:
         try:
             list_package(bucket, *parse_package(package))
         except Exception as err:
-            print("Error listing {}: {}".format(package, err), file=sys.stderr)
+            print("Error listing {}: {}".format(package, err),
+                  file=sys.stderr)
             break
 
 
