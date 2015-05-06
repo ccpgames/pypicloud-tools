@@ -17,6 +17,18 @@ Tools to bypass a PyPICloud installation and communicate directly with S3
 
 Uploads file(s) to the PyPICloud S3 bucket directly and performs an admin API call to rebuild the PyPICloud index after.
 
+Example:
+
+```bash
+$ upload dist/*
+Uploading example_project/example-project-0.0.1.tar.gz .....1 done!
+Uploading example_project/example_project-0.0.1-py2-none-any.whl .....1 done!
+Uploading example_project/example_project-0.0.1-py2.7.egg ......1 done!
+PyPICloud server at http://your.pypicloud.server/pypi updated
+```
+
+The numbers displayed are the amount of 50MB chunks you've sent to S3 as they send. It's fine if the file names use altering hypens/underscores per release type like you see above, they only need to match the initial part of the key before the `/` to be considered the same package.
+
 ### Download
 
 Downloads the latest or a specific version directly from S3. Does not talk to PyPICloud and does not install the downloaded package. You can use pip to do either/both of those things.
@@ -25,9 +37,40 @@ Also possible with the download command is the `--url` flag to only print a down
 
 By default, if there are multiple releases of the same package+release, download will prefer wheels, then eggs, then source distributions. You can override that behavior with the `--egg` and `--src` flags.
 
+Examples:
+
+```bash
+$ download example_project=0.0.1
+example_project-0.0.1-py2-none-any.whl
+```
+
+```bash
+$ download example_project --egg
+example_project-0.0.1-py2.7.egg
+```
+
+Pipes and redirects work like you'd expect: 
+
+```bash
+$ download example_project --src | tar -xzf -
+```
+
 ### List
 
 Lists a package's releases, or releases of a package at a specific version. Again, talks straight to S3 and bypasses the PyPICloud installation.
+
+Example:
+
+```bash
+$ list example_project
+example-project-0.0.1.tar.gz
+example_project-0.0.1-py2.7.egg
+example_project-0.0.1-py2-none-any.whl
+```
+
+Listing multiple packages or packages with a version specifier is also supported.
+
+When called without any arguments, `list` will display all known packages.
 
 
 ## Installation
