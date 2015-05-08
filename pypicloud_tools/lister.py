@@ -68,7 +68,10 @@ def print_versioned(package_releases, package):
             else:
                 break
 
-        versioned[parse_version(pkg_ver)].append(package_release)
+        versioned[parse_version(pkg_ver)].append("{}={}".format(
+            package_release[:len(package)],
+            package_release[len(package) + 1:],
+        ))
 
     # finally print them to stdout in order of newest first
     ver_order = sorted(versioned)

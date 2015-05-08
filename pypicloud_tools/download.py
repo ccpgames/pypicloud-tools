@@ -38,7 +38,7 @@ def prefer_wheels(packages, package, release=None):
         else:
             sources.append(pkg)
 
-    if "--src" in sys.argv and len(sources) == 1:
+    if ("--src" in sys.argv and len(sources) == 1) or len(packages) == 1:
         return sources[0]
     elif (not wheels or "--egg" in sys.argv) and len(eggs) == 1:
         return eggs[0]
