@@ -91,7 +91,7 @@ def settings_from_config(options):
 
     if all([parser.has_option(key, opt) for opt in s3_required]):
         if getattr(options, "acl", None):
-            acl = args.acl[0]
+            acl = options.acl[0]
         elif parser.has_option(key, "acl"):
             acl = parser.get(key, "acl")
         else:
