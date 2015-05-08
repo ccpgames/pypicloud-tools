@@ -27,7 +27,7 @@ class PyTest(TestCommand):
 
 setup(
     name="pypicloud-tools",
-    version="0.0.2",
+    version="0.0.3",
     author="Adam Talsma",
     author_email="se-adam.talsma@ccpgames.com",
     packages=["pypicloud_tools"],
