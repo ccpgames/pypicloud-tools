@@ -93,7 +93,3 @@ def main():
             print("Error listing {}: {}".format(package, err),
                   file=sys.stderr)
             break
-
-
-if __name__ == "__main__":
-    main()

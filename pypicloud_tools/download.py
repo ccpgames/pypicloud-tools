@@ -136,7 +136,3 @@ def main():
             print("Error downloading {}: {}".format(package, error),
                   file=sys.stderr)
             break
-
-
-if __name__ == "__main__":
-    main()

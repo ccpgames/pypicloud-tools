@@ -127,7 +127,3 @@ def main():
     else:
         update_cloud(settings.pypi)  # this raises on HTTP error
         print("PyPICloud server at {} updated".format(settings.pypi.server))
-
-
-if __name__ == "__main__":
-    main()
