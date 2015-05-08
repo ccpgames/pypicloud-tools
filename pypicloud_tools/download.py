@@ -6,26 +6,33 @@ Copyright (c) 2015 CCP Games. Released for use under the MIT license.
 
 from __future__ import print_function
 
-import re
 import sys
 from collections import defaultdict
-from pkg_resources import SetuptoolsVersion, parse_version
 
-from . import get_settings, get_bucket_conn, parse_package
+from . import get_settings, get_bucket_conn, parse_package, get_package_version
 
 
-def prefer_wheels(packages, package, release=None):
+def prefer_wheels(package_releases, package, release=None):
     """Given a list of packages, prefer a single wheel if not overridden.
 
     Args::
 
-        packages: a list of S3 keys for package releases
+        package_releases: a list of S3 keys for package releases
         package: string package name (used for error reporting)
         release: string release requested or None (used for error reporting)
 
     Returns:
         a single key if it was possible to reduce to one, or None
     """
+
+    versioned = defaultdict(list)
+    for package_release in package_releases:
+        package_version = get_package_version(package_release, package)
+        versioned[package_version].append(package_release)
+
+    # compare versions with pkg_resources.parse_version, find newest
+    ver_order = sorted(versioned)
+    packages = versioned[ver_order[-1]]
 
     wheels = []
     eggs = []
@@ -72,55 +79,37 @@ def download_package(bucket, package, release=None):
             if release is None or release in key.name.partition("/")[2]:
                 package_releases.append(key)
 
-    if release is not None and len(package_releases) == 1:
+    if len(package_releases) == 1:
         package_key = package_releases[0]
-    elif release is not None and len(package_releases) > 1:
-        # maybe we have a few different format types for the same release
-        package_key = prefer_wheels(package_releases, package, release)
-    elif release is not None and not package_releases:
-        raise SystemExit("Package {}={} not found".format(package, release))
     elif package_releases:
-        versioned = defaultdict(list)
-        for package_release in package_releases:
-            # parse out pkg_resources.SetuptoolsVersion objects from key.name
-            version = re.split(
-                "\.|-",
-                package_release.name[(len(package) * 2) + 2:],
-            )
-            pkg_ver = ""
-            for section in version:
-                new_ver = "{}{}{}".format(
-                    pkg_ver,
-                    "." if pkg_ver else "",
-                    section,
-                )
-                if isinstance(parse_version(new_ver), SetuptoolsVersion):
-                    pkg_ver = new_ver
-                else:
-                    break
-
-            versioned[parse_version(pkg_ver)].append(package_release)
-        # compare versions with pkg_resources.parse_version, find newest
-        ver_order = sorted(versioned)
-        package_key = prefer_wheels(versioned[ver_order[-1]], package, release)
+        package_key = prefer_wheels(package_releases, package, release)
     else:
         raise SystemExit("Package {}{} not found".format(
             package,
             "={}".format(release) if release else "",
         ))
 
+    write_key(package_key)
+
+
+def write_key(key):
+    """Writes the key to file or sys.stdout.
+
+    If it can write to a file, it will print the filename to stdout.
+    """
+
     if "--url-only" in sys.argv or "--url" in sys.argv:
-        print(package_key.generate_url(300))  # good for 5 minutes
+        print(key.generate_url(300))  # good for 5 minutes
     else:
         if sys.stdout.isatty():
             # open a file and stream the content into it
-            filename = package_key.name.split("/")[1]
+            filename = key.name.split("/")[1]
             with open(filename, "wb") as openpackage:
-                package_key.get_contents_to_file(openpackage)
+                key.get_contents_to_file(openpackage)
             print(filename)
         else:
             # stdout is being piped/redirected somewhere, write to it directly
-            package_key.get_contents_to_file(sys.stdout)
+            key.get_contents_to_file(sys.stdout)
 
 
 def main():

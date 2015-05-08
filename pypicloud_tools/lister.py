@@ -6,12 +6,10 @@ Copyright (c) 2015 CCP Games. Released for use under the MIT license.
 
 from __future__ import print_function
 
-import re
 import sys
 from collections import defaultdict
-from pkg_resources import SetuptoolsVersion, parse_version
 
-from . import get_settings, get_bucket_conn, parse_package
+from . import get_settings, get_bucket_conn, parse_package, get_package_version
 
 
 def list_package(bucket, package, release=None):
@@ -52,23 +50,8 @@ def print_versioned(package_releases, package):
     # sort them via pkg_resources' version sorting
     versioned = defaultdict(list)
     for package_release in package_releases:
-        version = re.split(
-            "\.|-",
-            package_release[len(package) + 1:],
-        )
-        pkg_ver = ""
-        for section in version:
-            new_ver = "{}{}{}".format(
-                pkg_ver,
-                "." if pkg_ver else "",
-                section,
-            )
-            if isinstance(parse_version(new_ver), SetuptoolsVersion):
-                pkg_ver = new_ver
-            else:
-                break
-
-        versioned[parse_version(pkg_ver)].append("{}={}".format(
+        version = get_package_version(package_release, package)
+        versioned[version].append("{}={}".format(
             package_release[:len(package)],
             package_release[len(package) + 1:],
         ))

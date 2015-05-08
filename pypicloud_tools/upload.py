@@ -8,6 +8,7 @@ from __future__ import print_function
 
 import os
 import re
+import sys
 import math
 import requests
 from filechunkio import FileChunkIO
@@ -30,7 +31,6 @@ def _upload_chunk(bucket, mp_id, part_num, filename, offset, bytes, retries=3):
             _upload_chunk(bucket, mp_id, part_num, filename, offset, bytes,
                           retries=retries - 1)
         else:
-            print("{} failed!".format(part_num))
             raise error
     else:
         print(part_num, end="")
@@ -80,7 +80,7 @@ def upload_file(filename, bucket, s3_config):
         if s3_config.acl:
             key = bucket.get_key(key_name)
             key.set_acl(s3_config.acl)
-        print(" done!".format(key_name, bucket.name))
+        print(" done!")
     else:
         mp.cancel_upload()
         print(" failed! :(")

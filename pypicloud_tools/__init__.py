@@ -7,11 +7,14 @@ Copyright (c) 2015 CCP Games. Released for use under the MIT license.
 from __future__ import print_function
 
 import os
+import re
 import sys
 import boto
 import argparse
 import ConfigParser
+from boto.s3.key import Key
 from collections import namedtuple
+from pkg_resources import SetuptoolsVersion, parse_version
 
 
 # standarized config objects
@@ -248,3 +251,32 @@ def parse_package(package):
         return p_split[0].strip(), p_split[-1].strip()
     else:
         return package, None
+
+
+def get_package_version(key, package):
+    """Parse out pkg_resources.SetuptoolsVersion objects from key.name.
+
+    Args:
+        key: a S3 Key object from boto or a string filename
+        package: the string package name without version
+    """
+
+    pattern = "\.|-"
+    if isinstance(key, Key):
+        version = re.split(pattern, key.name[(len(package) * 2) + 2:])
+    else:
+        version = re.split(pattern, key[len(package) + 1:])
+
+    pkg_ver = ""
+    for section in version:
+        new_ver = "{}{}{}".format(
+            pkg_ver,
+            "." if pkg_ver else "",
+            section,
+        )
+        if isinstance(parse_version(new_ver), SetuptoolsVersion):
+            pkg_ver = new_ver
+        else:
+            break
+
+    return parse_version(pkg_ver)
