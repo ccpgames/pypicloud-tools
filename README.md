@@ -2,6 +2,8 @@
 
 [View this on GitHub Pages](http://ccpgames.github.io/pypicloud-tools/)
 
+[![Build Status](https://travis-ci.org/ccpgames/pypicloud-tools.png?branch=master)](https://travis-ci.org/ccpgames/pypicloud-tools)
+[![Coverage Status](https://coveralls.io/repos/ccpgames/pypicloud-tools/badge.svg?branch=master)](https://coveralls.io/r/ccpgames/pypicloud-tools?branch=master)
 [![Version](https://img.shields.io/pypi/v/pypicloud-tools.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
 [![Download format](https://img.shields.io/badge/format-wheel-green.svg?)](https://pypi.python.org/pypi/pypicloud-tools/)
 [![Downloads this month](https://img.shields.io/pypi/dm/pypicloud-tools.svg)](https://pypi.python.org/pypi/pypicloud-tools/)
