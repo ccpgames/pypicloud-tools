@@ -148,7 +148,7 @@ def test_settings_from_config__read_errors(config_file, capfd):
     assert pypicloud_tools.settings_from_config(mock_options) == (None, None)
     out, err = capfd.readouterr()
 
-    assert "File contains parsing errors:" in err
+    assert "contains parsing errors:" in err
     assert not out
 
 
