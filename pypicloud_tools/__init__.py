@@ -11,10 +11,15 @@ import re
 import sys
 import boto
 import argparse
-import ConfigParser
 from boto.s3.key import Key
 from collections import namedtuple
 from pkg_resources import SetuptoolsVersion, parse_version
+
+
+if sys.version_info.major >= 3:
+    from configparser import RawConfigParser
+else:
+    from ConfigParser import RawConfigParser
 
 
 # standarized config objects
@@ -70,7 +75,7 @@ def settings_from_config(options):
         tuple of S3Config and PyPIConfig objects, or Nones when missing values
     """
 
-    parser = ConfigParser.RawConfigParser()
+    parser = RawConfigParser()
 
     if isinstance(options.config, list):
         config_file = options.config[0]

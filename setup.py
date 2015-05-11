@@ -27,7 +27,7 @@ class PyTest(TestCommand):
 
 setup(
     name="pypicloud-tools",
-    version="0.0.3",
+    version="0.0.4",
     author="Adam Talsma",
     author_email="se-adam.talsma@ccpgames.com",
     packages=["pypicloud_tools"],
@@ -39,6 +39,7 @@ setup(
     install_requires=[
         "boto >= 2.38.0",
         "futures >= 2.2.0",
+        "futures < 3.0.0",
         "filechunkio >= 1.6",
         "requests >= 2.6.2",
         "setuptools >= 15.0",
@@ -53,6 +54,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Topic :: System :: Software Distribution",
         "Topic :: Utilities",
     ],
