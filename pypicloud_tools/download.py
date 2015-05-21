@@ -9,7 +9,10 @@ from __future__ import print_function
 import sys
 from collections import defaultdict
 
-from . import get_settings, get_bucket_conn, parse_package, get_package_version
+from . import get_settings
+from . import get_bucket_conn
+from . import get_package_version
+from . import parse_package
 
 
 def prefer_wheels(package_releases, package, release=None):

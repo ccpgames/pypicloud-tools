@@ -51,7 +51,7 @@ $ download example_project --egg
 example_project-0.0.1-py2.7.egg
 ```
 
-Pipes and redirects work like you'd expect: 
+Pipes and redirects work like you'd expect:
 
 ```bash
 $ download example_project --src | tar -xzf -
@@ -73,6 +73,26 @@ example_project-0.0.1-py2-none-any.whl
 Listing multiple packages or packages with a version specifier is also supported.
 
 When called without any arguments, `list` will display all known packages.
+
+
+### Rehost
+
+Rehosts an upstream package from PyPI into the pypicloud installation. This can be handy if you have pypicloud clients which only have access to it and s3 but not the rest of the internet.
+
+Example:
+
+```bash
+$ rehost requests==1.0.0
+Collecting requests==1.0.0
+  Downloading requests-1.0.0.tar.gz (335kB)
+    100% |████████████████████████████████| 335kB 929kB/s
+  Saved /var/folders/53/kl4v4_9509ng148kp_pwmc5h0000gn/T/tmpuj5JUJ/requests-1.0.0.tar.gz
+Successfully downloaded requests
+Uploading requests/requests-1.0.0.tar.gz ............1 done!
+PyPICloud server at http://your_pypicloud_server/pypi updated
+```
+
+If a specific version is not provided, the latest will be used. Multiple packages can be used in the same command.
 
 
 ## Installation

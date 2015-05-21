@@ -14,7 +14,9 @@ import requests
 from filechunkio import FileChunkIO
 from concurrent.futures import ThreadPoolExecutor
 
-from . import print_dot, get_settings, get_bucket_conn
+from . import print_dot
+from . import get_settings
+from . import get_bucket_conn
 
 
 def _upload_chunk(bucket, mp_id, part_num, filename, offset, bytes, retries=3):
@@ -111,12 +113,8 @@ def update_cloud(pypi):
     return resp.ok
 
 
-def main():
-    """Main command line entry point for uploading."""
-
-    settings = get_settings(upload=True)
-
-    bucket = get_bucket_conn(settings.s3)
+def upload_files(settings, bucket):
+    """Uploads all files from settings.items to the bucket provided."""
 
     for file in settings.items:
         try:
@@ -127,3 +125,11 @@ def main():
     else:
         update_cloud(settings.pypi)  # this raises on HTTP error
         print("PyPICloud server at {} updated".format(settings.pypi.server))
+
+
+def main():
+    """Main command line entry point for uploading."""
+
+    settings = get_settings(upload=True)
+    bucket = get_bucket_conn(settings.s3)
+    upload_files(settings, bucket)

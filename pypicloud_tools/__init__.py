@@ -29,7 +29,7 @@ Settings = namedtuple("Settings", ("s3", "pypi", "items"))
 
 
 # used as a callback to show some progress to stdout
-print_dot = lambda x, y : print(".", end="")
+print_dot = lambda x, y: print(".", end="")
 
 
 # command line usage
@@ -88,7 +88,7 @@ def settings_from_config(options):
         print(error, file=sys.stderr)
 
     key = "pypicloud"  # config section key
-    if not key in parser.sections():
+    if key not in parser.sections():
         return None, None
 
     s3_conf = None
@@ -122,7 +122,7 @@ def settings_from_config(options):
     return s3_conf, pypi_conf
 
 
-def parse_args(upload=False, download=False, listing=False):
+def parse_args(upload=False, download=False, listing=False, rehost=False):
     """Builds an argparse ArgumentParser.
 
     Returns:
@@ -134,6 +134,11 @@ def parse_args(upload=False, download=False, listing=False):
         direction = "to"
         s3_flags = ("access", "bucket", "secret", "acl")
         remainders = ("files", " to PyPICloud's S3 bucket directly")
+    elif rehost:
+        verb = "rehost"
+        direction = "to"
+        s3_flags = ("access", "bucket", "secret", "acl")
+        remainders = ("packages", ", use Package=N.N.N for a specific version")
     else:
         verb = "download" if download else "list"
         direction = "from"
@@ -192,7 +197,7 @@ def parse_args(upload=False, download=False, listing=False):
     return parser.parse_args(sys.argv[1:]), parser
 
 
-def get_settings(upload=False, download=False, listing=False):
+def get_settings(upload=False, download=False, listing=False, rehost=False):
     """Gathers both settings for S3 and PyPICloud.
 
     Args:
@@ -204,10 +209,10 @@ def get_settings(upload=False, download=False, listing=False):
         a Settings object with `s3` and `pypi` attributes
     """
 
-    if len([key for key in (upload, download, listing) if key]) != 1:
+    if len([key for key in (upload, download, listing, rehost) if key]) != 1:
         raise RuntimeError("Expecting a single boolean argument to be True!")
 
-    args, parser = parse_args(upload, download, listing)
+    args, parser = parse_args(upload, download, listing, rehost)
 
     if hasattr(args, "files"):
         remainders = args.files

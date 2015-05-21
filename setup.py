@@ -35,6 +35,7 @@ setup(
         "upload = pypicloud_tools.upload:main",
         "download = pypicloud_tools.download:main",
         "list = pypicloud_tools.lister:main",
+        "rehost = pypicloud_tools.rehost:main",
     ]},
     install_requires=[
         "boto >= 2.38.0",
