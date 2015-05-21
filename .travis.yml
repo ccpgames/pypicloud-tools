@@ -5,7 +5,7 @@ python:
   - '3.4'
 
 before_install:
-  - pip install -U coveralls pip pytest pytest-cov setuptools
+  - pip install -U coveralls pip pytest pytest-cov setuptools wheel
 
 script: python setup.py test
 
@@ -15,3 +15,26 @@ after_success:
 notifications:
   slack:
     secure: CuyuO7xWmWebhRw64LJzl/ab1wiQbpmDgm0ui8/M5Yg3J9Oz1m7R/0kSBbcDwA2oerQCpEEVh6yB6okyFJ+0HSC08SepI0W68/AwbvIDxYOtLgCBeLLZoelWyDXVh1E45pK+kLoFh5dhRF1oQDxMMXE0q7V8jKQggrPw1amRdTMrBv6AXIWgyvS8T7oHOgABnxgzsEsBevXUSbjbyfKL2TwOt897A2CTGj0nUsvb3nviGG6eOwp0dGSBsAMU9MwUWkCWD1P2KehwDleXQG8QnkI30oNiBK8c72JwCQ0V5Ays62ZvkcA3B/bBK0UQOlqL73Oa80JPbgAcz0QYnzgCiNuvLxoYARnBEzvO4wqlzJWG2xPF9BjCvfslbgF758YSP8GD84DjXLDYw39HDEDMgeW2uooC5441S74OTYzkQXs42flNs/eF4O1HSWFUUdGMM1bBQ2+gBPnJFdCsoExEth+yLEqzRGx9XwcQQWMuk5qiomySOk/MKgGcK/wDCUPsRhRR6GFZdiyD8y666PKFiMNjp8FyotP9kGf05dG4bQrKZQUyf2KTb770eHJmOCqwFed7UVf/GYU/gTZYo0nUTWw6x168K/Z/W/4PzHtTHTuoQ9oGU86B1hrGtVLvE/RQBYf8yzBM9m1yhhO8H4qqLWUNFpcBlclQhIDjTaFH+K4=
+
+before_deploy:
+  - python setup.py build sdist bdist_wheel
+  - if [ "x" == "$(grep $(git tag -l --points-at=HEAD) setup.py)x" ]; then echo 'new tag does not exist in setup.py; bailing!'; exit 1; else echo "tag found in setup.py"; fi
+
+deploy:
+  - provider: pypi
+    user: atal
+    skip_cleanup: true
+    distributions: "sdist bdist_wheel"
+    password:
+      secure: "TAU5GUmvKQADw63jrhwoRFRx1JzpFRzoV6aKV0Zz0mXU56lyF2YYUDcRYax4oTlWl/tpfB2BZEHRaQaJEvg4ODSH1his6fQmLHI5F8AuNG93UPBPsVC89Lq4vscpD+YoUO+8/X/tnJZB09JLD9bU36UaVSPPyZECKlgB6GPkIclPIF7D2Sv3Lj1CpDvP9h7P0iYZE74yaR+59SUeQK42DCxqMjMJhZ1mIWZazF5yLiUcv/16JknLL9e2oHcMoWK9CjVDk+Q5aIRH4Pm+TSeuso9p7VUkVPO9VR9yYt20S2dw1q15T0+Du5s7hJxdUdKgjhT7hLexgBf9AF6icSJLJMX8/1jfWSBUUmdFfTzVO95hpVTk/mMxnjiGCf78On5wJKw8iSQ91ufkeqrJ+tgkj4oszzY4ACPlkO9lk8s9Q6RYxjj/DM1ple3e5Jt+ASBBKiQIc8PmAncFITkOTBAEv9LfRgZ9/xkSJ0+2TcYBuJvEOdtJ6mTSY6itH9xFUcPBV2YqgIgDzS1Kc7C+yeUdS6XmRgD3cKv8sySUzTsHZvLsl3Zw6I/AmjKtlKUFYsWBHfk+d8ptVwNefCYgazPnwKtHR6fmGuFLJkWB0QyC2CMXDEi0z/FPMmqG5P58OHFf0BFBuvFPYTwI6fz3Bgg4W7YlLQS7MOYGmnvmWfWXWF0="
+    on:
+      tags: true
+      repo: ccpgames/pypicloud-tools
+  - provider: releases
+    api_key:
+      secure: "uWikcUAwK5f0lj77rO5b87dXCFGHRpT8/yG9t9sOJuodYMrpbROMRzMyjwQmp1eNjXiNypEPW6rwtr+wWbtjNEUyn9P8/F9qj3rsLfAW7D9dMIrD6hzZ2qMPs7Gn3EF44lqsXlsctqtKqElUDheU4yJM7mKOpkLCv9KaWmawuu7yGEbi92Lb4aNjQCU8cu1l3OtQix0fMbk/BVAMR2P/7vH/toDuL1el7PtPjbkv6tjS5HeSoPlt9upUHiHIjQ/fnwtcEcMTX6zSnslMpVbXD2LvdU/mLDjFNR+EC8dvNaRLG/YqsUCJgHbuIQnk1ZKDv52ldmiGk6zqaI/Mp6pRiPMrnFozwbZfkuo5QtVpSE1yAwZxy8HbQaDz1wZJhv61X0BPw88vVxuWcG9y2Pvf3jntCZWKTI/J1mkv9Rb2+EVKi6oc0NI5tArN7hDpMEWRS+NI8EfOBHiCAPJLDTQO6LLZhNEXQikrTri+MmQgN42P4KIAwrENlFI1k1RqL8X052cN8pgCDHJ41Rw/fjZgWlnJVdn3XkYx+loSTCSkmZJ1cTB1QxQuux6wNq8j6Q/qVcALV2QeH9ZqKGTnVqknpiZLmoXHwL6dpKJ9pL5nvkEu7FSFX4XbKc1XGf3Jcgf5t34Gz/zu3YMiAziuooFQPeEi/v4vZfNDqslOeP+wqXU="
+    file: "/home/travis/build/ccpgames/pypicloud-tools/dist/*.whl"
+    file_glob: true
+    skip_cleanup: true
+    on:
+      tags: true
