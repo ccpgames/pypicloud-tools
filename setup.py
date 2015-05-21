@@ -1,6 +1,7 @@
 """pypicloud-tools setup.py"""
 
 
+import io
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
@@ -25,6 +26,10 @@ class PyTest(TestCommand):
         raise SystemExit(errno)
 
 
+with io.open("README.rst", "r", encoding="utf-8") as openreadme:
+    long_description = openreadme.read()
+
+
 setup(
     name="pypicloud-tools",
     version="0.0.5",
@@ -47,6 +52,8 @@ setup(
     ],
     tests_require=["pytest", "pytest-cov", "mock"],
     cmdclass={"test": PyTest},
+    description="Tools to bypass PyPICloud and work with S3 directly",
+    long_description=long_description,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
