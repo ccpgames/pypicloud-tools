@@ -137,7 +137,7 @@ Configuration for pypicloud-tools piggybacks on your ``~/.pypirc`` file.
 You can specify an alternate config file with the ``--config`` flag, but
 it must be in the same syntax. That syntax is:
 
-.. code:: conf
+.. code:: text
 
     [pypicloud]
         repository:http://your.pypicloud.server/pypi
