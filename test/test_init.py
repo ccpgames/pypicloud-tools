@@ -253,7 +253,7 @@ def test_get_settings__no_args():
         pypicloud_tools.get_settings(True, False, True)
 
 
-@pytest.mark.parametrize("direction", ("upload", "download"))
+@pytest.mark.parametrize("direction", ("upload", "download", "rehost"))
 def test_get_settings__needs_remainders(direction):
     """When not listing, the user must provide a package or filename."""
 
@@ -308,7 +308,7 @@ def test_get_settings__s3_overrides(direction, acl, config_file):
     assert settings.items == ["some_file", "some_other_file"]
 
 
-@pytest.mark.parametrize("direction", ("upload", "download"))
+@pytest.mark.parametrize("direction", ("upload", "download", "rehost"))
 def test_get_settings__pypi_overrides(direction, config_file):
     """If pypi options are given on the command line, they take precedence."""
 

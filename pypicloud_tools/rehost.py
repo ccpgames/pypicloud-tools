@@ -1,5 +1,7 @@
-"""Takes packages from PyPI and rehosts them in pypicloud, in case your clients
-can reach your pypicloud installation but not the rest of the internet."""
+"""Rehosts packages from PyPI in pypicloud.
+
+Copyright (c) 2015 CCP Games. Released for use under the MIT license.
+"""
 
 
 import os

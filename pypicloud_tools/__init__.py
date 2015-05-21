@@ -15,10 +15,9 @@ from boto.s3.key import Key
 from collections import namedtuple
 from pkg_resources import SetuptoolsVersion, parse_version
 
-
-if sys.version_info.major >= 3:
-    from configparser import RawConfigParser
-else:
+try:
+    from configparser import RawConfigParser  # python 3+
+except ImportError:  # pragma: no cover
     from ConfigParser import RawConfigParser
 
 
