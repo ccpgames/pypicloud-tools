@@ -150,7 +150,7 @@ def test_upload_file__failure(capfd, config_file):
     )
 
 
-def test_upload_chunk(capfd):
+def test_upload_chunk():
     """Ensure the chunk uploader is working as expected."""
 
     bucket = mock.Mock()
@@ -166,10 +166,6 @@ def test_upload_chunk(capfd):
     mp_upload.upload_part_from_file.assert_called_once_with(
         fp=patched_filechunkio().__enter__(), part_num=1, cb=upload.print_dot
     )
-
-    out, err = capfd.readouterr()
-    assert not err
-    assert "1" in out
 
 
 def test_upload_chunks__errors():

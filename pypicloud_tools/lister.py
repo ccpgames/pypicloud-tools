@@ -34,6 +34,8 @@ def list_package(bucket, package, release=None):
     for key in bucket.get_all_keys():
         if key.name.startswith("{}/".format(package)) or package is None:
             package_base, _, pkg_full_name = key.name.partition("/")
+            if not pkg_full_name:
+                continue
             if package is None:
                 if package_base not in package_releases:
                     package_releases.append(package_base)

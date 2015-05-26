@@ -34,8 +34,6 @@ def _upload_chunk(bucket, mp_id, part_num, filename, offset, bytes, retries=3):
                           retries=retries - 1)
         else:
             raise error
-    else:
-        print(part_num, end="")
 
 
 def upload_file(filename, bucket, s3_config):
@@ -44,7 +42,7 @@ def upload_file(filename, bucket, s3_config):
     source_size = os.stat(filename).st_size
     headers = {"Content-Type": "application/octet-stream"}
 
-    chunk_size = 5242880  # 50MB chunks
+    chunk_size = 5242880  # 5MB chunks
     bytes_per_chunk = max(int(math.sqrt(chunk_size) * math.sqrt(source_size)),
                           chunk_size)
     num_chunks = int(math.ceil(source_size / float(bytes_per_chunk)))

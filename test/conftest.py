@@ -56,6 +56,7 @@ def key_list():
         make_key("package_two/package_two-0.0.1-py2.py3-none-any.whl"),
         make_key("package_two/package_two-0.0.1.tar.gz"),
         make_key("package_two/package_two-0.0.1-py2.7.egg"),
+        make_key("package_two/"),
         make_key("error_pkg/error_pkg-2.3.4-py2.py3-none-any.whl"),
         make_key("error_pkg/error_pkg-2.3.4-py2-none-any.whl"),
         make_key("error_pkg/error_pkg-2.3.4.tar.gz"),

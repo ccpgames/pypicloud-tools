@@ -24,15 +24,14 @@ Example:
 .. code:: bash
 
     $ upload dist/*
-    Uploading example_project/example-project-0.0.1.tar.gz .....1 done!
-    Uploading example_project/example_project-0.0.1-py2-none-any.whl .....1 done!
-    Uploading example_project/example_project-0.0.1-py2.7.egg ......1 done!
+    Uploading example_project/example-project-0.0.1.tar.gz ..... done!
+    Uploading example_project/example_project-0.0.1-py2-none-any.whl ..... done!
+    Uploading example_project/example_project-0.0.1-py2.7.egg ...... done!
     PyPICloud server at http://your.pypicloud.server/pypi updated
 
-The numbers displayed are the amount of 50MB chunks you've sent to S3 as
-they send. It's fine if the file names use altering hypens/underscores
-per release type like you see above, they only need to match the initial
-part of the key before the ``/`` to be considered the same package.
+It's fine if the file names use altering hypens/underscores per release type
+like you see above, they only need to match the initial part of the key before
+the ``/`` to be considered the same package.
 
 Download
 ~~~~~~~~
@@ -105,7 +104,7 @@ Example:
         100% |████████████████████████████████| 335kB 929kB/s
       Saved /var/folders/53/kl4v4_9509ng148kp_pwmc5h0000gn/T/tmpuj5JUJ/requests-1.0.0.tar.gz
     Successfully downloaded requests
-    Uploading requests/requests-1.0.0.tar.gz ............1 done!
+    Uploading requests/requests-1.0.0.tar.gz ............ done!
     PyPICloud server at http://your_pypicloud_server/pypi updated
 
 If a specific version is not provided, the latest will be used. Multiple
