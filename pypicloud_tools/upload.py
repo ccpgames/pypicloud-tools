@@ -25,8 +25,18 @@ def _upload_chunk(bucket, mp_id, part_num, filename, offset, bytes, retries=3):
     try:
         for mp in bucket.get_all_multipart_uploads():
             if mp.id == mp_id:
-                with FileChunkIO(filename, "rb", offset=offset, bytes=bytes) as fp:
-                    mp.upload_part_from_file(fp=fp, part_num=part_num, cb=print_dot)
+                chunk_io = FileChunkIO(
+                    filename,
+                    "rb",
+                    offset=offset,
+                    bytes=bytes,
+                )
+                with chunk_io as fp:
+                    mp.upload_part_from_file(
+                        fp=fp,
+                        part_num=part_num,
+                        cb=print_dot,
+                    )
                 break
     except Exception as error:
         if retries:
@@ -118,7 +128,10 @@ def upload_files(settings, bucket):
         try:
             upload_file(file, bucket, settings.s3)
         except Exception as error:
-            print("Error uploading {}: {}".format(file, error), file=sys.stderr)
+            print(
+                "Error uploading {}: {}".format(file, error),
+                file=sys.stderr,
+            )
             break
     else:
         update_cloud(settings.pypi)  # this raises on HTTP error

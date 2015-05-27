@@ -1,13 +1,14 @@
 language: python
 
-python:
-  - '2.7'
-  - '3.4'
+env:
+  - TOXENV=py27
+  - TOXENV=py34
+  - TOXENV=pep8
 
 before_install:
-  - pip install -U coveralls pip pytest pytest-cov setuptools wheel
+  - pip install -U coveralls pip pytest pytest-cov setuptools wheel tox
 
-script: python setup.py test
+script: tox
 
 after_success:
   - coveralls
@@ -30,6 +31,7 @@ deploy:
     on:
       tags: true
       repo: ccpgames/pypicloud-tools
+      condition: $TOXENV = py34
   - provider: releases
     api_key:
       secure: "uWikcUAwK5f0lj77rO5b87dXCFGHRpT8/yG9t9sOJuodYMrpbROMRzMyjwQmp1eNjXiNypEPW6rwtr+wWbtjNEUyn9P8/F9qj3rsLfAW7D9dMIrD6hzZ2qMPs7Gn3EF44lqsXlsctqtKqElUDheU4yJM7mKOpkLCv9KaWmawuu7yGEbi92Lb4aNjQCU8cu1l3OtQix0fMbk/BVAMR2P/7vH/toDuL1el7PtPjbkv6tjS5HeSoPlt9upUHiHIjQ/fnwtcEcMTX6zSnslMpVbXD2LvdU/mLDjFNR+EC8dvNaRLG/YqsUCJgHbuIQnk1ZKDv52ldmiGk6zqaI/Mp6pRiPMrnFozwbZfkuo5QtVpSE1yAwZxy8HbQaDz1wZJhv61X0BPw88vVxuWcG9y2Pvf3jntCZWKTI/J1mkv9Rb2+EVKi6oc0NI5tArN7hDpMEWRS+NI8EfOBHiCAPJLDTQO6LLZhNEXQikrTri+MmQgN42P4KIAwrENlFI1k1RqL8X052cN8pgCDHJ41Rw/fjZgWlnJVdn3XkYx+loSTCSkmZJ1cTB1QxQuux6wNq8j6Q/qVcALV2QeH9ZqKGTnVqknpiZLmoXHwL6dpKJ9pL5nvkEu7FSFX4XbKc1XGf3Jcgf5t34Gz/zu3YMiAziuooFQPeEi/v4vZfNDqslOeP+wqXU="
@@ -38,3 +40,4 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+      condition: $TOXENV = py34

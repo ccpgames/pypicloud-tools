@@ -44,8 +44,7 @@ setup(
     ]},
     install_requires=[
         "boto >= 2.38.0",
-        "futures >= 2.2.0",
-        "futures < 3.0.0",
+        "futures >= 2.2.0, < 3.0.0",
         "filechunkio >= 1.6",
         "requests >= 2.6.2",
         "setuptools >= 15.0",

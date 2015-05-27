@@ -32,7 +32,7 @@ print_dot = lambda x, y: print(".", end="")
 
 
 # command line usage
-USAGE="""
+USAGE = """
     {called_as} [options] <FILE> [FILE] ...
 
 Reads {pypirc} (override with --config) for the section and extra keys:
@@ -229,12 +229,21 @@ def get_settings(upload=False, download=False, listing=False, rehost=False):
             acl = args.acl[0]
         else:
             acl = None
-        s3_config = S3Config(args.bucket[0], args.access[0], args.secret[0], acl)
+        s3_config = S3Config(
+            args.bucket[0],
+            args.access[0],
+            args.secret[0],
+            acl,
+        )
     else:
         s3_config = None
 
     if args.server and args.user and args.password:
-        pypi_config = PyPIConfig(args.server[0], args.user[0], args.password[0])
+        pypi_config = PyPIConfig(
+            args.server[0],
+            args.user[0],
+            args.password[0],
+        )
     else:
         pypi_config = None
 
