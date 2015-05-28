@@ -68,10 +68,6 @@ def test_rehost_filters():
     ]
 
     with rehost.TempDir() as storage:
-        for fake_file in fake_files:
-            with open(os.path.join(storage.dir, fake_file), "w") as openfile:
-                openfile.write("here be data")
-
         user_input = ["Flask==0.9", "Flask-SQLAlchemy==0.16"]
         expected = [os.path.join(storage.dir, file_) for file_ in
             ("Flask-0.9.tar.gz", "Flask-SQLAlchemy-0.16.tar.gz")]
