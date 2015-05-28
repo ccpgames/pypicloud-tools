@@ -24,7 +24,7 @@ except ImportError:  # pragma: no cover
 # standarized config objects
 S3Config = namedtuple("S3Config", ("bucket", "access", "secret", "acl"))
 PyPIConfig = namedtuple("PyPIConfig", ("server", "user", "password"))
-Settings = namedtuple("Settings", ("s3", "pypi", "items"))
+Settings = namedtuple("Settings", ("s3", "pypi", "items", "parsed"))
 
 
 # used as a callback to show some progress to stdout
@@ -182,6 +182,13 @@ def parse_args(upload=False, download=False, listing=False, rehost=False):
         help="Specify a config file (default: %(default)s)",
     )
 
+    if rehost:
+        parser.add_argument(
+            "--deps", "--with-deps",
+            action="store_true",
+            help="Rehost the package(s) dependencies as well",
+        )
+
     parser.add_argument(
         dest=remainders[0],
         metavar=remainders[0].upper(),
@@ -257,7 +264,7 @@ def get_settings(upload=False, download=False, listing=False, rehost=False):
         print("ERROR: Could not determine S3 settings.", file=sys.stderr)
         raise SystemExit(parser.print_help())
 
-    return Settings(s3_config, pypi_config, remainders)
+    return Settings(s3_config, pypi_config, remainders, args)
 
 
 def parse_package(package):

@@ -48,6 +48,7 @@ setup(
         "filechunkio >= 1.6",
         "requests >= 2.6.2",
         "setuptools >= 15.0",
+        "pip >= 7.0",  # should be using 7 anyways for the caching
     ],
     tests_require=["pytest", "pytest-cov", "mock"],
     cmdclass={"test": PyTest},
