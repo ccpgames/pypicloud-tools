@@ -55,6 +55,7 @@ def test_rehost_filters():
     # it's a good example of dependency munging. we pin them here, but they're
     # obviously not pinned upstream, so we end up with two versions locally
     fake_files = [
+        junk_file,
         "Flask-0.10.1.tar.gz",
         "Flask-0.9.tar.gz",
         "Flask-SQLAlchemy-0.16.tar.gz",
@@ -64,7 +65,6 @@ def test_rehost_filters():
         "setuptools-16.0-py2.py3-none-any.whl",
         "SQLAlchemy-1.0.4.tar.gz",
         "Werkzeug-0.10.4-py2.py3-none-any.whl",
-        junk_file,
     ]
 
     with rehost.TempDir() as storage:
@@ -76,7 +76,8 @@ def test_rehost_filters():
         expected = [os.path.join(storage.dir, file_) for file_ in
             ("Flask-0.9.tar.gz", "Flask-SQLAlchemy-0.16.tar.gz")]
         with mock.patch.object(rehost.logging, "info") as patched_info_log:
-            assert rehost.find_downloaded(user_input, storage.dir) == expected
+            with mock.patch.object(rehost.os, "listdir", return_value=fake_files):
+                assert rehost.find_downloaded(user_input, storage.dir) == expected
 
         patched_info_log.assert_any_call(
             "file %s skipped, unsupported extension",
