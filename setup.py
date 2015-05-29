@@ -32,7 +32,7 @@ with io.open("README.rst", "r", encoding="utf-8") as openreadme:
 
 setup(
     name="pypicloud-tools",
-    version="0.0.8",
+    version="0.1.0",
     author="Adam Talsma",
     author_email="se-adam.talsma@ccpgames.com",
     packages=["pypicloud_tools"],
