@@ -7,13 +7,12 @@ Copyright (c) 2015 CCP Games. Released for use under the MIT license.
 from __future__ import print_function
 
 import os
-import re
 import sys
 import boto
 import argparse
-from boto.s3.key import Key
+import operator
 from collections import namedtuple
-from pkg_resources import SetuptoolsVersion, parse_version
+from pip.utils import SUPPORTED_EXTENSIONS
 
 try:
     from configparser import RawConfigParser  # python 3+
@@ -26,6 +25,19 @@ S3Config = namedtuple("S3Config", ("bucket", "access", "secret", "acl"))
 PyPIConfig = namedtuple("PyPIConfig", ("server", "user", "password"))
 Settings = namedtuple("Settings", ("s3", "pypi", "items", "parsed"))
 
+# Supported Extensions for uploading, downloading, listing, rehosting..
+SUPPORTED_EXTENSIONS = tuple(list(SUPPORTED_EXTENSIONS) +
+                             [".egg", ".exe", ".msi"])
+
+# used to preform version comparisons
+OPERATORS = {
+    "==": operator.eq,
+    "!=": operator.ne,
+    ">=": operator.ge,
+    "<=": operator.le,
+    ">": operator.gt,
+    "<": operator.lt,
+}
 
 # used as a callback to show some progress to stdout
 print_dot = lambda x, y: print(".", end="")
@@ -265,43 +277,3 @@ def get_settings(upload=False, download=False, listing=False, rehost=False):
         raise SystemExit(parser.print_help())
 
     return Settings(s3_config, pypi_config, remainders, args)
-
-
-def parse_package(package):
-    """Parse `package` string to package name and package version."""
-
-    if package and "=" in package:
-        # would like to use left-side unpacking, but old python support :`(
-        p_split = package.split("=")
-        return p_split[0].strip(), p_split[-1].strip()
-    else:
-        return package, None
-
-
-def get_package_version(key, package):
-    """Parse out pkg_resources.SetuptoolsVersion objects from key.name.
-
-    Args:
-        key: a S3 Key object from boto or a string filename
-        package: the string package name without version
-    """
-
-    pattern = "\.|-"
-    if isinstance(key, Key):
-        version = re.split(pattern, key.name[(len(package) * 2) + 2:])
-    else:
-        version = re.split(pattern, key[len(package) + 1:])
-
-    pkg_ver = ""
-    for section in version:
-        new_ver = "{}{}{}".format(
-            pkg_ver,
-            "." if pkg_ver else "",
-            section,
-        )
-        if isinstance(parse_version(new_ver), SetuptoolsVersion):
-            pkg_ver = new_ver
-        else:
-            break
-
-    return parse_version(pkg_ver)

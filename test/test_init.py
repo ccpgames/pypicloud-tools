@@ -19,11 +19,15 @@ def test_get_bucket_conn():
     mock_bucket = mock.Mock()
     mock_boto.get_bucket = mock.Mock(return_value=mock_bucket)
 
-    with mock.patch.object(pypicloud_tools.boto, "connect_s3", return_value=mock_boto) as patched_boto:
+    with mock.patch.object(pypicloud_tools.boto, "connect_s3",
+                           return_value=mock_boto) as patched_boto:
         bucket = pypicloud_tools.get_bucket_conn(mock_config)
 
     assert bucket == mock_bucket
-    patched_boto.assert_called_once_with(mock_config.access, mock_config.secret)
+    patched_boto.assert_called_once_with(
+        mock_config.access,
+        mock_config.secret,
+    )
     mock_boto.get_bucket.assert_called_once_with(mock_config.bucket)
 
 
@@ -262,7 +266,10 @@ def test_get_settings__needs_remainders(direction):
         pypicloud_tools.get_settings(download=True)
 
 
-@pytest.mark.parametrize("direction, acl", [("upload", "fake-acl"), ("download", None)])
+@pytest.mark.parametrize("direction, acl", [
+    ("upload", "fake-acl"),
+    ("download", None),
+])
 def test_get_settings__s3_overrides(direction, acl, config_file):
     """If s3 options are given on the command line, they take precedence."""
 
@@ -395,27 +402,6 @@ def test_get_settings__no_s3_config(config_file, capfd):
     out, err = capfd.readouterr()
     assert "ERROR: Could not determine S3 settings." in err
     assert DEFAULT_CONFIG in out  # stdout should be a help message...
-
-
-@pytest.mark.parametrize(
-    "package, pkg_name, pkg_ver",
-    [
-        ("foo-bar", "foo-bar", None),
-        ("foo-bar=0.0.1", "foo-bar", "0.0.1"),
-        (
-            "foo-bar.baz[stuff]=1.2.beta-FINAL.release.2.tar.gz",
-            "foo-bar.baz[stuff]",
-            "1.2.beta-FINAL.release.2.tar.gz",
-        ),
-    ],
-    ids=("no version", "simple version", "long exact"),
-)
-def test_parse_package(package, pkg_name, pkg_ver):
-    """Ensure package strings are properly parsed."""
-
-    pkg, ver = pypicloud_tools.parse_package(package)
-    assert pkg == pkg_name
-    assert ver == pkg_ver
 
 
 if __name__ == "__main__":

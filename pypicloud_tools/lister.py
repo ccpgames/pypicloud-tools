@@ -8,21 +8,21 @@ from __future__ import print_function
 
 import sys
 from collections import defaultdict
+from pkg_resources import safe_name
 
 from . import get_settings
 from . import get_bucket_conn
-from . import get_package_version
-from . import parse_package
+from .utils import parse_package
+from .utils import parse_package_file
 
 
-def list_package(bucket, package, release=None):
+def list_package(bucket, package):
     """List the available releases a package, optionally package+release.
 
     Args::
 
         bucket: a connected S3 bucket object to look for package in
-        package: string package name without version
-        release: string release version to get or None for the latest
+        package: parsed package object requested
 
     Returns:
         string URL to download the package at release or latest
@@ -30,17 +30,23 @@ def list_package(bucket, package, release=None):
 
     # figure out key name from package and release requested and what's
     # available in the bucket...
+    pkg_name = None if package is None else package.project_name
     package_releases = []
     for key in bucket.get_all_keys():
-        if key.name.startswith("{}/".format(package)) or package is None:
+        if package is None or key.name.startswith("{}/".format(pkg_name)):
             package_base, _, pkg_full_name = key.name.partition("/")
             if not pkg_full_name:
                 continue
             if package is None:
                 if package_base not in package_releases:
                     package_releases.append(package_base)
-            elif release is None or release in pkg_full_name:
-                package_releases.append(pkg_full_name)
+            elif pkg_name == safe_name(package_base):
+                key_pkg = parse_package_file(pkg_full_name, package)
+                for spec in package.specs:
+                    if not spec[0](key_pkg.specs[0][1], spec[1]):
+                        break
+                else:
+                    package_releases.append(pkg_full_name)
 
     if package is None:
         package_releases.sort()
@@ -55,11 +61,12 @@ def print_versioned(package_releases, package):
     # sort them via pkg_resources' version sorting
     versioned = defaultdict(list)
     for package_release in package_releases:
-        version = get_package_version(package_release, package)
-        versioned[version].append("{}={}".format(
-            package_release[:len(package)],
-            package_release[len(package) + 1:],
-        ))
+        package_release = parse_package_file(package_release, package)
+
+        versioned[package_release.specs[0][1]].append(("{}=={}".format(
+            package_release.project_name,
+            package_release.specs[0][1],
+        )))
 
     # finally print them to stdout in order of newest first
     ver_order = sorted(versioned)
@@ -76,7 +83,7 @@ def main():
 
     for package in settings.items or [None]:
         try:
-            list_package(bucket, *parse_package(package))
+            list_package(bucket, parse_package(package))
         except Exception as err:
             print("Error listing {}: {}".format(package, err),
                   file=sys.stderr)

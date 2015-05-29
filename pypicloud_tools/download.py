@@ -8,21 +8,21 @@ from __future__ import print_function
 
 import sys
 from collections import defaultdict
+from pkg_resources import safe_name
 
 from . import get_settings
 from . import get_bucket_conn
-from . import get_package_version
-from . import parse_package
+from .utils import parse_package
+from .utils import parse_package_file
 
 
-def prefer_wheels(package_releases, package, release=None):
+def prefer_wheels(package_releases, package):
     """Given a list of packages, prefer a single wheel if not overridden.
 
     Args::
 
         package_releases: a list of S3 keys for package releases
-        package: string package name (used for error reporting)
-        release: string release requested or None (used for error reporting)
+        package: parsed package object requested
 
     Returns:
         a single key if it was possible to reduce to one, or None
@@ -30,8 +30,9 @@ def prefer_wheels(package_releases, package, release=None):
 
     versioned = defaultdict(list)
     for package_release in package_releases:
-        package_version = get_package_version(package_release, package)
-        versioned[package_version].append(package_release)
+        package_version = parse_package_file(package_release, package)
+        if package_version:
+            versioned[package_version].append(package_release)
 
     # compare versions with pkg_resources.parse_version, find newest
     ver_order = sorted(versioned)
@@ -48,7 +49,7 @@ def prefer_wheels(package_releases, package, release=None):
         else:
             sources.append(pkg)
 
-    if ("--src" in sys.argv and len(sources) == 1) or len(packages) == 1:
+    if "--src" in sys.argv and len(sources) == 1:
         return sources[0]
     elif (not wheels or "--egg" in sys.argv) and len(eggs) == 1:
         return eggs[0]
@@ -56,19 +57,18 @@ def prefer_wheels(package_releases, package, release=None):
         return wheels[0]
     else:
         raise SystemExit("Found too many results for {}{}:\n  {}".format(
-            package,
-            "={}".format(release) if release else "",
+            package.project_name,
+            package.specifier,
             "\n  ".join([key.name for key in packages]),
         ))
 
 
-def download_package(bucket, package, release=None):
+def download_package(bucket, package):
     """Gets the download URL for a package, optionally package+release.
 
     Args:
         bucket: a connected S3 bucket object to look for package in
-        package: string package name without version
-        release: string release version to get or None for the latest
+        package: parsed package object
 
     Returns:
         string URL to download the package at release or latest
@@ -78,18 +78,25 @@ def download_package(bucket, package, release=None):
     # available in the bucket...
     package_releases = []
     for key in bucket.get_all_keys():
-        if key.name.startswith("{}/".format(package)):
-            if release is None or release in key.name.partition("/")[2]:
+        key_base, _, key_name = key.name.partition("/")
+        if not key_name or safe_name(key_base) != package.project_name:
+            continue
+        key_pkg = parse_package_file(key_name, package)
+        if package.project_name == key_pkg.project_name:
+            for spec in package.specs:
+                if not spec[0](key_pkg.specs[0][1], spec[1]):
+                    break
+            else:
                 package_releases.append(key)
 
     if len(package_releases) == 1:
         package_key = package_releases[0]
     elif package_releases:
-        package_key = prefer_wheels(package_releases, package, release)
+        package_key = prefer_wheels(package_releases, package)
     else:
         raise SystemExit("Package {}{} not found".format(
-            package,
-            "={}".format(release) if release else "",
+            package.project_name,
+            package.specifier,
         ))
 
     write_key(package_key)
@@ -123,7 +130,7 @@ def main():
 
     for package in settings.items:
         try:
-            download_package(bucket, *parse_package(package))
+            download_package(bucket, parse_package(package))
         except Exception as error:
             print("Error downloading {}: {}".format(package, error),
                   file=sys.stderr)

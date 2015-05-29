@@ -10,8 +10,8 @@ if sys.version_info.major == 2:
 else:
     import builtins
 
-import pypicloud_tools
 from pypicloud_tools import download
+from pypicloud_tools.utils import parse_package
 
 
 @pytest.fixture
@@ -47,39 +47,49 @@ def isatty_cleaner():
 def test_main():
     """Mocks everything to ensure the main entry point program flow."""
 
-    bucket = mock.Mock()
+    buck = mock.Mock()
     settings = mock.Mock()
     settings.items = ["faked"]
 
-    with mock.patch.object(download, "get_settings", return_value=settings) as settings_patch:
-        with mock.patch.object(download, "get_bucket_conn", return_value=bucket) as get_bucket_patch:
-            with mock.patch.object(download, "download_package") as download_patch:
-                with mock.patch.object(download, "parse_package", return_value=(1, 2)) as parse_patch:
+    mock_s = mock.patch.object(download, "get_settings", return_value=settings)
+    mock_b = mock.patch.object(download, "get_bucket_conn", return_value=buck)
+    mock_download = mock.patch.object(download, "download_package")
+    mock_parse = mock.patch.object(download, "parse_package")
+
+    with mock_s as settings_patch:
+        with mock_b as get_bucket_patch:
+            with mock_download as download_patch:
+                with mock_parse as parse_patch:
                     download.main()
 
     settings_patch.assert_called_once_with(download=True)
     get_bucket_patch.assert_called_once_with(settings.s3)
-    download_patch.assert_called_once_with(bucket, 1, 2)
     parse_patch.assert_called_once_with("faked")
+    download_patch.assert_called_once_with(buck, parse_patch())
 
 
 def test_main_buries_errors(capfd):
     """Any Exception thrown in download_package should be handled."""
 
-    bucket = mock.Mock()
+    buck = mock.Mock()
     settings = mock.Mock()
     settings.items = ["faked"]
 
-    with mock.patch.object(download, "get_settings", return_value=settings) as settings_patch:
-        with mock.patch.object(download, "get_bucket_conn", return_value=bucket) as get_bucket_patch:
-            with mock.patch.object(download, "download_package", side_effect=IOError) as download_patch:
-                with mock.patch.object(download, "parse_package", return_value=(1, 2)) as parse_patch:
+    mock_s = mock.patch.object(download, "get_settings", return_value=settings)
+    mock_b = mock.patch.object(download, "get_bucket_conn", return_value=buck)
+    d_io = mock.patch.object(download, "download_package", side_effect=IOError)
+    mock_parse = mock.patch.object(download, "parse_package")
+
+    with mock_s as settings_patch:
+        with mock_b as get_bucket_patch:
+            with d_io as download_patch:
+                with mock_parse as parse_patch:
                     download.main()
 
     settings_patch.assert_called_once_with(download=True)
     get_bucket_patch.assert_called_once_with(settings.s3)
-    download_patch.assert_called_once_with(bucket, 1, 2)
     parse_patch.assert_called_once_with("faked")
+    download_patch.assert_called_once_with(buck, parse_patch())
 
     out, err = capfd.readouterr()
     assert not out
@@ -92,7 +102,10 @@ def test_download_package__specific(bucket_and_keys):
     bucket, keys = bucket_and_keys
 
     with mock.patch.object(download, "write_key") as patched_write:
-        download.download_package(bucket, "package-one", "1.2.3-alpha1")
+        download.download_package(
+            bucket,
+            parse_package("package-one == 1.2.3-alpha1")
+        )
 
     patched_write.assert_called_once_with(keys[0])
 
@@ -101,23 +114,29 @@ def test_download_package__not_found(bucket_and_keys):
     """SystemExit should be raised when the package is not found."""
 
     with pytest.raises(SystemExit) as exit_error:
-        download.download_package(bucket_and_keys[0], "package-unknown")
+        download.download_package(
+            bucket_and_keys[0],
+            parse_package("package-unknown"),
+        )
 
     assert "Package package-unknown not found" in exit_error.value.args
 
     with pytest.raises(SystemExit) as specific_error:
-        download.download_package(bucket_and_keys[0], "something", "1.2.3")
+        download.download_package(
+            bucket_and_keys[0],
+            parse_package("something==1.2.3")
+        )
 
-    assert "Package something=1.2.3 not found" in specific_error.value.args
+    assert "Package something==1.2.3 not found" in specific_error.value.args
 
 
-def test_download_package__perfers_wheels(bucket_and_keys):
+def test_download_package__prefers_wheels(bucket_and_keys):
     """When multiple versions are available, by default prefer wheels."""
 
     bucket, keys = bucket_and_keys
 
     with mock.patch.object(download, "write_key") as patched_write:
-        download.download_package(bucket, "package_two", "0.0.1")
+        download.download_package(bucket, parse_package("package_two==0.0.1"))
 
     patched_write.assert_called_once_with(keys[6])
 
@@ -126,10 +145,10 @@ def test_download_package__prefer_egg(bucket_and_keys, argv_cleanup):
     """Ensure you can receive an egg if you request one."""
 
     bucket, keys = bucket_and_keys
-    download.sys.argv = ["download", "package_two=0.0.1", "--egg"]
+    download.sys.argv = ["download", "package_two==0.0.1", "--egg"]
 
     with mock.patch.object(download, "write_key") as patched_write:
-        download.download_package(bucket, "package_two", "0.0.1")
+        download.download_package(bucket, parse_package("package_two==0.0.1"))
 
     patched_write.assert_called_once_with(keys[8])
 
@@ -138,10 +157,13 @@ def test_download_package__prefer_src(bucket_and_keys, argv_cleanup):
     """Ensure you can receive a source package if it's requested."""
 
     bucket, keys = bucket_and_keys
-    download.sys.argv = ["download", "package_two=0.0.1", "--src"]
+    download.sys.argv = ["download", "package_two==0.0.1", "--src"]
 
     with mock.patch.object(download, "write_key") as patched_write:
-        download.download_package(bucket, "package_two", "0.0.1")
+        download.download_package(
+            bucket,
+            parse_package("package_two==0.0.1")
+        )
 
     patched_write.assert_called_once_with(keys[7])
 
@@ -151,24 +173,24 @@ def test_download_package__too_many_packages(bucket_and_keys):
 
     bucket, keys = bucket_and_keys
     with pytest.raises(SystemExit) as exit_error:
-        what = download.prefer_wheels(keys, "error_pkg")
+        download.prefer_wheels(keys, parse_package("error_pkg"))
 
     expected = (
-        "Found too many results for error_pkg:\n"
-        "  error_pkg/error_pkg-2.3.4-py2.py3-none-any.whl\n"
-        "  error_pkg/error_pkg-2.3.4-py2-none-any.whl\n"
-        "  error_pkg/error_pkg-2.3.4.tar.gz"
+        "Found too many results for error-pkg:\n"
+        "  error-pkg/error-pkg-2.3.4-py2.py3-none-any.whl\n"
+        "  error-pkg/error-pkg-2.3.4-py2-none-any.whl\n"
+        "  error-pkg/error_pkg-2.3.4.tar.gz"
     )
     assert expected in exit_error.value.args
 
     with pytest.raises(SystemExit) as exit_error:
-        what = download.prefer_wheels(keys, "error_pkg", "2.3.4")
+        download.prefer_wheels(keys, parse_package("error_pkg==2.3.4"))
 
     expected = (
-        "Found too many results for error_pkg=2.3.4:\n"
-        "  error_pkg/error_pkg-2.3.4-py2.py3-none-any.whl\n"
-        "  error_pkg/error_pkg-2.3.4-py2-none-any.whl\n"
-        "  error_pkg/error_pkg-2.3.4.tar.gz"
+        "Found too many results for error-pkg==2.3.4:\n"
+        "  error-pkg/error-pkg-2.3.4-py2.py3-none-any.whl\n"
+        "  error-pkg/error-pkg-2.3.4-py2-none-any.whl\n"
+        "  error-pkg/error_pkg-2.3.4.tar.gz"
     )
     assert expected in exit_error.value.args
 

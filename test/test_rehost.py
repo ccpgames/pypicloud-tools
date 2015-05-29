@@ -26,7 +26,8 @@ def test_cleanup_tempdir(include_deps):
     with mock.patch.object(rehost.pip, "main") as patched_pip:
         with mock.patch.object(rehost, "upload_files") as patched_upload:
             with mock.patch.object(rehost, "get_bucket_conn") as patched_conn:
-                with mock.patch.object(rehost, "get_settings", return_value=fake_settings):
+                with mock.patch.object(rehost, "get_settings",
+                                       return_value=fake_settings):
                     rehost.main()
 
     assert len(starting) == len(os.listdir(tempfile.tempdir))
@@ -70,10 +71,14 @@ def test_rehost_filters():
     with rehost.TempDir() as storage:
         user_input = ["Flask==0.9", "Flask-SQLAlchemy==0.16"]
         expected = [os.path.join(storage.dir, file_) for file_ in
-            ("Flask-0.9.tar.gz", "Flask-SQLAlchemy-0.16.tar.gz")]
+                    ("Flask-0.9.tar.gz", "Flask-SQLAlchemy-0.16.tar.gz")]
         with mock.patch.object(rehost.logging, "info") as patched_info_log:
-            with mock.patch.object(rehost.os, "listdir", return_value=fake_files):
-                assert rehost.find_downloaded(user_input, storage.dir) == expected
+            with mock.patch.object(rehost.os, "listdir",
+                                   return_value=fake_files):
+                assert rehost.find_downloaded(
+                    user_input,
+                    storage.dir,
+                ) == expected
 
         patched_info_log.assert_any_call(
             "file %s skipped, unsupported extension",

@@ -8,16 +8,16 @@ import os
 import pip
 import shutil
 import logging
-import operator
 import tempfile
 from pip.index import egg_info_matches
-from pip.utils import SUPPORTED_EXTENSIONS
 from pkg_resources import SetuptoolsVersion
 from pkg_resources import parse_requirements
 
 from . import Settings
 from . import get_settings
 from . import get_bucket_conn
+from . import OPERATORS
+from . import SUPPORTED_EXTENSIONS
 from .upload import upload_files
 
 
@@ -45,14 +45,6 @@ def find_downloaded(packages, storage_dir):
         a list of string full file paths of package releases to upload
     """
 
-    oper_chart = {
-        "==": operator.eq,
-        "!=": operator.ne,
-        ">=": operator.ge,
-        "<=": operator.le,
-        ">": operator.gt,
-        "<": operator.lt,
-    }
     to_upload = []
     files_on_disk = os.listdir(storage_dir)
     for package in packages:
@@ -73,7 +65,7 @@ def find_downloaded(packages, storage_dir):
                 continue
             for spec in parsed.specs:
                 req_ver = SetuptoolsVersion(spec[1])
-                if not oper_chart[spec[0]](file_ver, req_ver):
+                if not OPERATORS[spec[0]](file_ver, req_ver):
                     logging.info("downloaded file %s is not %s %s", file_,
                                  spec[0], spec[1])
                     break

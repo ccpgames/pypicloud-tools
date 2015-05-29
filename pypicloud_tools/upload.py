@@ -12,6 +12,7 @@ import sys
 import math
 import requests
 from filechunkio import FileChunkIO
+from pkg_resources import safe_name
 from concurrent.futures import ThreadPoolExecutor
 
 from . import print_dot
@@ -72,7 +73,7 @@ def upload_file(filename, bucket, s3_config):
         else:
             break
 
-    key_name = "{}/{}".format(base_name, os.path.basename(filename))
+    key_name = "{}/{}".format(safe_name(base_name), os.path.basename(filename))
     mp = bucket.initiate_multipart_upload(key_name, headers=headers)
 
     print("Uploading {} ...".format(key_name), end="")
