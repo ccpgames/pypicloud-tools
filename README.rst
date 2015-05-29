@@ -24,9 +24,9 @@ Example:
 .. code:: bash
 
     $ upload dist/*
-    Uploading example_project/example-project-0.0.1.tar.gz ..... done!
-    Uploading example_project/example_project-0.0.1-py2-none-any.whl ..... done!
-    Uploading example_project/example_project-0.0.1-py2.7.egg ...... done!
+    Uploading example-project/example-project-0.0.1.tar.gz ..... done!
+    Uploading example-project/example_project-0.0.1-py2-none-any.whl ..... done!
+    Uploading example-project/example_project-0.0.1-py2.7.egg ...... done!
     PyPICloud server at http://your.pypicloud.server/pypi updated
 
 It's fine if the file names use altering hypens/underscores per release type
@@ -51,12 +51,12 @@ Examples:
 
 .. code:: bash
 
-    $ download example_project=0.0.1
+    $ download example_project==0.0.1
     example_project-0.0.1-py2-none-any.whl
 
 .. code:: bash
 
-    $ download example_project --egg
+    $ download example-project --egg
     example_project-0.0.1-py2.7.egg
 
 Pipes and redirects work like you'd expect:
@@ -77,9 +77,9 @@ Example:
 .. code:: bash
 
     $ list example_project
-    example-project-0.0.1.tar.gz
-    example_project-0.0.1-py2.7.egg
-    example_project-0.0.1-py2-none-any.whl
+    example-project==0.0.1 : example-project-0.0.1.tar.gz
+    example-project==0.0.1 : example_project-0.0.1-py2.7.egg
+    example-project==0.0.1 : example_project-0.0.1-py2-none-any.whl
 
 Listing multiple packages or packages with a version specifier is also
 supported.
