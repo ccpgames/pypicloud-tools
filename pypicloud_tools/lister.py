@@ -1,7 +1,4 @@
-"""PyPICloud list tool to bypass PyPICloud and list directly from S3.
-
-Copyright (c) 2015 CCP Games. Released for use under the MIT license.
-"""
+"""PyPICloud list tool to bypass PyPICloud and list directly from S3."""
 
 
 from __future__ import print_function

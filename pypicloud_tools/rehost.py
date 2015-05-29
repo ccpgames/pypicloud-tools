@@ -1,7 +1,4 @@
-"""Rehosts packages from PyPI in pypicloud.
-
-Copyright (c) 2015 CCP Games. Released for use under the MIT license.
-"""
+"""Rehosts packages from PyPI in pypicloud."""
 
 
 import os

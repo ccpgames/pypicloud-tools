@@ -1,7 +1,4 @@
-"""Contstants and helpers common to multiple operations.
-
-Copyright (c) 2015 CCP Games. Released for use under the MIT license.
-"""
+"""Contstants and helpers common to multiple operations."""
 
 
 from __future__ import print_function
@@ -10,7 +7,9 @@ import os
 import sys
 import boto
 import argparse
+import datetime
 import operator
+import pkg_resources
 from collections import namedtuple
 from pip.utils import SUPPORTED_EXTENSIONS
 
@@ -149,15 +148,16 @@ def parse_args(upload=False, download=False, listing=False, rehost=False):
         verb = "rehost"
         direction = "to"
         s3_flags = ("access", "bucket", "secret", "acl")
-        remainders = ("packages", ", use Package=N.N.N for a specific version")
+        remainders = ("packages", ", use ==N.N.N for a specific version")
     else:
         verb = "download" if download else "list"
         direction = "from"
         s3_flags = ("access", "bucket", "secret")
-        remainders = ("packages", ", use Package=N.N.N for a specific version")
+        remainders = ("packages", ", use ==N.N.N for a specific version")
 
     parser = argparse.ArgumentParser(
         prog=os.path.basename(sys.argv[0]),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         description="{} package(s) {} S3, bypassing PyPICloud".format(
             verb.title(),
             direction,
@@ -200,6 +200,19 @@ def parse_args(upload=False, download=False, listing=False, rehost=False):
             action="store_true",
             help="Rehost the package(s) dependencies as well",
         )
+
+    parser.add_argument(
+        "-v", "--version",
+        action="version",
+        version=(
+            "pypicloud-tools %(prog)s v{}\n"
+            "Copyright (c) {} CCP hf.\n"
+            "Released for use under the MIT license."
+        ).format(
+            pkg_resources.get_distribution("pypicloud-tools").version,
+            datetime.datetime.now().year,
+        ),
+    )
 
     parser.add_argument(
         dest=remainders[0],

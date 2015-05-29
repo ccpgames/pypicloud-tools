@@ -1,7 +1,4 @@
-"""PyPICloud uploader tool to bypass PyPICloud and send directly to S3.
-
-Copyright (c) 2015 CCP Games. Released for use under the MIT license.
-"""
+"""PyPICloud uploader tool to bypass PyPICloud and send directly to S3."""
 
 
 from __future__ import print_function
