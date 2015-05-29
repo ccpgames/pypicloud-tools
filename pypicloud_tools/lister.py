@@ -60,12 +60,13 @@ def print_versioned(package_releases, package):
 
     # sort them via pkg_resources' version sorting
     versioned = defaultdict(list)
-    for package_release in package_releases:
-        package_release = parse_package_file(package_release, package)
+    for package_file in package_releases:
+        package_release = parse_package_file(package_file, package)
 
-        versioned[package_release.specs[0][1]].append(("{}=={}".format(
+        versioned[package_release.specs[0][1]].append(("{}=={} : {}".format(
             package_release.project_name,
             package_release.specs[0][1],
+            package_file,
         )))
 
     # finally print them to stdout in order of newest first

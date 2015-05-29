@@ -67,12 +67,12 @@ def test_print_versioned__in_order(capfd):
         "some_thing-1.7.5.tar.gz",
     ]
     expected = [
-        "some-thing==2.4.3",
-        "some-thing==1.7.5",
-        "some-thing==1.5.2",
-        "some-thing==1.5.2.dev1",
-        "some-thing==1.2.4",
-        "some-thing==0.0.1",
+        "some-thing==2.4.3 : some_thing-2.4.3.tar.gz",
+        "some-thing==1.7.5 : some_thing-1.7.5.tar.gz",
+        "some-thing==1.5.2 : some_thing-1.5.2-py2.py3-none-any.whl",
+        "some-thing==1.5.2.dev1 : some_thing-1.5.2.dev1.tar.gz",
+        "some-thing==1.2.4 : some_thing-1.2.4.egg",
+        "some-thing==0.0.1 : some_thing-0.0.1-py2.py3-none-any.whl",
     ]
 
     lister.print_versioned(releases, parse_package("some_thing"))
