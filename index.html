@@ -59,16 +59,15 @@ admin API call to rebuild the PyPICloud index after.</p>
 <p>Example:</p>
 
 <pre lang="sourceCode"><code>$ upload dist/*
-Uploading example_project/example-project-0.0.1.tar.gz .....1 done!
-Uploading example_project/example_project-0.0.1-py2-none-any.whl .....1 done!
-Uploading example_project/example_project-0.0.1-py2.7.egg ......1 done!
+Uploading example-project/example-project-0.0.1.tar.gz ..... done!
+Uploading example-project/example_project-0.0.1-py2-none-any.whl ..... done!
+Uploading example-project/example_project-0.0.1-py2.7.egg ...... done!
 PyPICloud server at http://your.pypicloud.server/pypi updated
 </code></pre>
 
-<p>The numbers displayed are the amount of 50MB chunks you've sent to S3 as
-they send. It's fine if the file names use altering hypens/underscores
-per release type like you see above, they only need to match the initial
-part of the key before the <code>/</code> to be considered the same package.</p>
+<p>It's fine if the file names use altering hypens/underscores per release
+type like you see above, they only need to match the initial part of the
+key before the <code>/</code> to be considered the same package.</p>
 
 <h3>
 <a id="download" class="anchor" href="#download" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download</h3>
@@ -86,11 +85,11 @@ can override that behavior with the <code>--egg</code> and <code>--src</code> fl
 
 <p>Examples:</p>
 
-<pre lang="sourceCode"><code>$ download example_project=0.0.1
+<pre lang="sourceCode"><code>$ download example_project==0.0.1
 example_project-0.0.1-py2-none-any.whl
 </code></pre>
 
-<pre lang="sourceCode"><code>$ download example_project --egg
+<pre lang="sourceCode"><code>$ download example-project --egg
 example_project-0.0.1-py2.7.egg
 </code></pre>
 
@@ -109,9 +108,9 @@ installation.</p>
 <p>Example:</p>
 
 <pre lang="sourceCode"><code>$ list example_project
-example-project-0.0.1.tar.gz
-example_project-0.0.1-py2.7.egg
-example_project-0.0.1-py2-none-any.whl
+example-project==0.0.1 : example-project-0.0.1.tar.gz
+example-project==0.0.1 : example_project-0.0.1-py2.7.egg
+example-project==0.0.1 : example_project-0.0.1-py2-none-any.whl
 </code></pre>
 
 <p>Listing multiple packages or packages with a version specifier is also
@@ -135,7 +134,7 @@ Collecting requests==1.0.0
     100% |████████████████████████████████| 335kB 929kB/s
   Saved /var/folders/53/kl4v4_9509ng148kp_pwmc5h0000gn/T/tmpuj5JUJ/requests-1.0.0.tar.gz
 Successfully downloaded requests
-Uploading requests/requests-1.0.0.tar.gz ............1 done!
+Uploading requests/requests-1.0.0.tar.gz ............ done!
 PyPICloud server at http://your_pypicloud_server/pypi updated
 </code></pre>
 
