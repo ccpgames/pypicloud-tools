@@ -17,7 +17,8 @@ def test_cleanup_tempdir(include_deps):
     """Ensure the tempdir used is removed afterwards."""
 
     starting = os.listdir(tempfile.tempdir)
-    fake_s3 = S3Config("fake_bucket", "fake_access", "fake_secret", "fake_acl")
+    fake_s3 = S3Config("fake_bucket", "fake_access", "fake_secret", "fake_acl",
+                       "fake_region")
     fake_pypi = PyPIConfig("fake_server", "fake_user", "fake_passwd")
     fake_args = mock.Mock()
     fake_args.deps = include_deps

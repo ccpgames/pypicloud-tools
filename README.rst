@@ -146,6 +146,7 @@ it must be in the same syntax. That syntax is:
         access:some_key
         secret:other_key
         acl:optional_acl
+        region:optional_region
 
 The key **must** be ``pypicloud``, it is the only key pypicloud-tools
 will look at. The username/password combination should have admin

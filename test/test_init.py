@@ -15,6 +15,7 @@ def test_get_bucket_conn():
     """Tests the calls to boto to get our bucket object."""
 
     mock_config = mock.MagicMock(spec=pypicloud_tools.S3Config)
+    mock_config.region = None
     mock_boto = mock.Mock()
     mock_bucket = mock.Mock()
     mock_boto.get_bucket = mock.Mock(return_value=mock_bucket)
@@ -29,6 +30,33 @@ def test_get_bucket_conn():
         mock_config.secret,
     )
     mock_boto.get_bucket.assert_called_once_with(mock_config.bucket)
+
+
+def test_get_bucket_conn__to_region():
+    """Tests the calls to boto to get our bucket."""
+
+    mock_config = mock.MagicMock(spec=pypicloud_tools.S3Config)
+    mock_boto = mock.Mock()
+    mock_bucket = mock.Mock()
+    mock_boto.get_bucket = mock.Mock(return_value=mock_bucket)
+
+    with mock.patch.object(pypicloud_tools.boto.s3, "connect_to_region",
+                           return_value=mock_boto) as patched_boto:
+        bucket = pypicloud_tools.get_bucket_conn(mock_config)
+
+    assert bucket == mock_bucket
+    patched_boto.assert_called_once_with(mock_config.region)
+    mock_boto.get_bucket.assert_called_once_with(mock_config.bucket)
+
+
+def test_get_bucket_conn__auth_fail():
+    """Ensure the error message raised when S3 credentials fail."""
+
+    null_options = pypicloud_tools.S3Config('test', None, None, None, None)
+    with pytest.raises(SystemExit) as error:
+        pypicloud_tools.get_bucket_conn(null_options)
+
+    assert "~/.aws/credentials" in error.value.args[0]
 
 
 def test_settings_from_config(config_file):
@@ -46,11 +74,13 @@ def test_settings_from_config(config_file):
             "bucket:test-bucket-name",
             "access:test-access-key",
             "secret:test-secret-key",
+            "region:test-region-name",
             "acl:test-acl",
         ]))
 
     expected_s3 = pypicloud_tools.S3Config(
-        "test-bucket-name", "test-access-key", "test-secret-key", "test-acl"
+        "test-bucket-name", "test-access-key", "test-secret-key", "test-acl",
+        "test-region-name"
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://test-server/pypi", "test-username", "test-password"
@@ -98,7 +128,7 @@ def test_settings_from_config__cmdline_acl(config_file):
         ]))
 
     expected_s3 = pypicloud_tools.S3Config(
-        "bucket-name", "access-key", "secret-key", "override-acl"
+        "bucket-name", "access-key", "secret-key", "override-acl", None
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://test-server/pypi", "test-username", "test-password"
@@ -129,7 +159,7 @@ def test_settings_from_config__no_acl(config_file):
         ]))
 
     expected_s3 = pypicloud_tools.S3Config(
-        "bucket-name", "access-key", "secret-key", None,
+        "bucket-name", "access-key", "secret-key", None, None
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://test-server/pypi", "test-username", "test-password"
@@ -159,7 +189,7 @@ def test_settings_from_config__read_errors(config_file, capfd):
 def test_parse_args__list_package():
     """Ensure the parser is setup correctly for listing a package."""
 
-    pypicloud_tools.sys.argv = ["list", "test_package"]
+    pypicloud_tools.sys.argv = ["list", "--region", "mine", "test_package"]
     options, parser = pypicloud_tools.parse_args(listing=True)
 
     assert isinstance(parser, pypicloud_tools.argparse.ArgumentParser)
@@ -171,6 +201,7 @@ def test_parse_args__list_package():
         "server": False,
         "access": False,
         "secret": False,
+        "region": ["mine"],
         "user": False,
         "password": False,
         "config": DEFAULT_CONFIG,
@@ -196,6 +227,7 @@ def test_parse_args__list_all():
         "secret": False,
         "user": False,
         "password": False,
+        "region": False,
         "config": ["fake.config"],
     }
     assert vars(options) == expected_options
@@ -216,6 +248,7 @@ def test_parse_args__upload():
         "server": False,
         "access": False,
         "acl": ["fake-acl"],
+        "region": False,
         "secret": False,
         "user": False,
         "password": False,
@@ -228,7 +261,8 @@ def test_parse_args__upload():
 def test_parse_args__download():
     """Ensure the parser is properly configured for downloads."""
 
-    pypicloud_tools.sys.argv = ["download", "--secret", "abc", "fake_package"]
+    pypicloud_tools.sys.argv = ["download", "--region", "somewhere",
+                                "--secret", "abc", "fake_package"]
     options, parser = pypicloud_tools.parse_args(download=True)
 
     assert isinstance(parser, pypicloud_tools.argparse.ArgumentParser)
@@ -240,6 +274,7 @@ def test_parse_args__download():
         "server": False,
         "access": False,
         "secret": ["abc"],
+        "region": ["somewhere"],
         "user": False,
         "password": False,
         "config": DEFAULT_CONFIG,
@@ -282,6 +317,7 @@ def test_get_settings__s3_overrides(direction, acl, config_file):
             "bucket:bucket-name",
             "access:access-key",
             "secret:secret-key",
+            "region:test-region",
         ]))
 
     pypicloud_tools.sys.argv = [direction]
@@ -296,6 +332,8 @@ def test_get_settings__s3_overrides(direction, acl, config_file):
         "fake-access",
         "--secret",
         "fake-secret",
+        "--region",
+        "fake-region",
         "--config",
         config_file,
         "some_file",
@@ -304,7 +342,7 @@ def test_get_settings__s3_overrides(direction, acl, config_file):
 
     settings = pypicloud_tools.get_settings(**{direction: True})
     expected_s3 = pypicloud_tools.S3Config(
-        "fake-bucket", "fake-access", "fake-secret", acl,
+        "fake-bucket", "fake-access", "fake-secret", acl, "fake-region"
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://test-server/pypi", "test-username", "test-password"
@@ -346,7 +384,7 @@ def test_get_settings__pypi_overrides(direction, config_file):
 
     settings = pypicloud_tools.get_settings(**{direction: True})
     expected_s3 = pypicloud_tools.S3Config(
-        "bucket-name", "access-key", "secret-key", None,
+        "bucket-name", "access-key", "secret-key", None, None
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://some-server/pypi", "some-user", "some-passwd"
@@ -369,6 +407,7 @@ def test_get_settings__config_fillins(config_file):
             "bucket:bucket-name",
             "access:access-key",
             "secret:secret-key",
+            "region:place-a",
         ]))
 
     pypicloud_tools.sys.argv = [
@@ -379,7 +418,7 @@ def test_get_settings__config_fillins(config_file):
         "some_other_file",
     ]
     expected_s3 = pypicloud_tools.S3Config(
-        "bucket-name", "access-key", "secret-key", None,
+        "bucket-name", "access-key", "secret-key", None, "place-a"
     )
     expected_pypi = pypicloud_tools.PyPIConfig(
         "http://test-server/pypi", "test-username", "test-password"
