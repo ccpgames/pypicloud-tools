@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover
 
 
 # standarized config objects
-S3Config = namedtuple("S3Config", ("bucket", "access", "secret", "acl"))
+S3Config = namedtuple("S3Config", ("bucket", "region", "acl"))
 PyPIConfig = namedtuple("PyPIConfig", ("server", "user", "password"))
 Settings = namedtuple("Settings", ("s3", "pypi", "items", "parsed"))
 
@@ -53,8 +53,7 @@ Reads {pypirc} (override with --config) for the section and extra keys:
     username:admin
     password:hunter7
     bucket:your_bucket
-    access:some_key
-    secret:other_key
+    region:aws_region
     acl:optional_acl
 
 Note:
@@ -62,6 +61,9 @@ Note:
     To talk directly to S3, you need the `bucket`, `access` and `secret` values
     filled in. The ACL defined here is your default, you can override per file
     via the --acl flag, which takes precendence.
+
+    AWS Access_Key and Secret_Key need to be set in your credentials file at
+    ~/.aws/credentials.
 """.format(
     called_as=os.path.basename(sys.argv[0]),
     pypirc=os.path.join(os.path.expanduser("~"), ".pypirc")
@@ -71,7 +73,7 @@ Note:
 def get_bucket_conn(s3_config):
     """Uses a S3Config and boto to return a bucket connection object."""
 
-    s3_conn = boto.connect_s3(s3_config.access, s3_config.secret)
+    s3_conn = boto.s3.connect_to_region(s3_config.region)
     return s3_conn.get_bucket(s3_config.bucket)
 
 
@@ -104,7 +106,7 @@ def settings_from_config(options):
     s3_conf = None
     pypi_conf = None
 
-    s3_required = ("bucket", "access", "secret")
+    s3_required = ("bucket", "region")
     pypi_required = ("repository", "username", "password")
 
     if all([parser.has_option(key, opt) for opt in s3_required]):
@@ -117,8 +119,7 @@ def settings_from_config(options):
 
         s3_conf = S3Config(
             parser.get(key, "bucket"),
-            parser.get(key, "access"),
-            parser.get(key, "secret"),
+            parser.get(key, "region"),
             acl,
         )
 
@@ -142,17 +143,17 @@ def parse_args(upload=False, download=False, listing=False, rehost=False):
     if upload:
         verb = "upload"
         direction = "to"
-        s3_flags = ("access", "bucket", "secret", "acl")
+        s3_flags = ("bucket", "region", "acl")
         remainders = ("files", " to PyPICloud's S3 bucket directly")
     elif rehost:
         verb = "rehost"
         direction = "to"
-        s3_flags = ("access", "bucket", "secret", "acl")
+        s3_flags = ("bucket", "region", "acl")
         remainders = ("packages", ", use ==N.N.N for a specific version")
     else:
         verb = "download" if download else "list"
         direction = "from"
-        s3_flags = ("access", "bucket", "secret")
+        s3_flags = ("bucket", "region")
         remainders = ("packages", ", use ==N.N.N for a specific version")
 
     parser = argparse.ArgumentParser(
@@ -256,15 +257,14 @@ def get_settings(upload=False, download=False, listing=False, rehost=False):
     if not remainders and not listing:
         raise SystemExit(parser.print_help())
 
-    if args.bucket and args.access and args.secret:
+    if args.bucket and args.region:
         if hasattr(args, "acl") and args.acl:
             acl = args.acl[0]
         else:
             acl = None
         s3_config = S3Config(
             args.bucket[0],
-            args.access[0],
-            args.secret[0],
+            args.region[0],
             acl,
         )
     else:
